@@ -11,10 +11,15 @@
 </template>
 
 
-<script setup>
-defineProps({
-  todo: Object,
-});
+<script setup lang="ts">
+interface Todo {
+  text: string;
+  done: boolean;
+}
+
+defineProps<{
+  todo: Todo;
+}>()
 
 const emit = defineEmits(['delete', 'toggleDone']);
 
@@ -24,6 +29,7 @@ const confirmDelete = () => {
   }
 };
 </script>
+
 
 
 <style scoped>

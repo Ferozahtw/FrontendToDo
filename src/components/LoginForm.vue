@@ -66,7 +66,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -83,7 +83,7 @@ const goToRegister = () => {
   router.push('/register');
 };
 
-const loginWith = (provider) => {
+const loginWith = (provider: string) => {
   alert(`Weiter mit ${provider} wird bald unterstützt`);
   // später: window.location.href = `/oauth2/authorize/${provider.toLowerCase()}`
 };
