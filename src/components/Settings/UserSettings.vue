@@ -5,38 +5,34 @@
       <button class="close-btn">✕</button>
     </header>
 
-    <!-- Plan -->
     <div class="plan-section">
       <div>
         <div class="label">Plan</div>
-        <div class="value">Beginner</div>
+        <div class="value">Free</div>
       </div>
       <button class="manage-btn">Manage plan</button>
     </div>
 
     <hr />
 
-    <!-- Foto -->
     <div class="photo-section">
       <div class="label">Photo</div>
       <div class="photo-block">
         <div class="avatar">{{ name.charAt(0).toUpperCase() }}</div>
         <div class="photo-actions">
-          <button class="change-photo">Change photo</button>
-          <button class="remove-photo">Remove photo</button>
+          <a href="#" class="change-photo" @click.prevent="changePhoto">Change photo</a>
+          <a href="#" class="remove-photo" @click.prevent="removePhoto">Remove photo</a>
           <small>Pick a photo up to 4MB. Your avatar photo will be public.</small>
         </div>
       </div>
     </div>
 
-    <!-- Name -->
     <div class="field-group">
       <label for="name">Name</label>
       <input v-model="name" id="name" type="text" />
       <div class="char-count">{{ name.length }}/255</div>
     </div>
 
-    <!-- Email -->
     <div class="field-group">
       <label for="email">Email</label>
       <div class="value-group">
@@ -45,7 +41,6 @@
       </div>
     </div>
 
-    <!-- Password -->
     <div class="field-group">
       <label for="password">Password</label>
       <button class="secondary-btn" @click="addPassword">Add password</button>
@@ -65,6 +60,16 @@ const changeEmail = () => {
 
 const addPassword = () => {
   alert('Passwort hinzufügen');
+};
+
+const changePhoto = () => {
+  alert('Foto ändern');
+  // Hier könntest du die Logik zum Ändern des Fotos einfügen
+};
+
+const removePhoto = () => {
+  alert('Foto entfernen');
+  // Hier könntest du die Logik zum Entfernen des Fotos einfügen
 };
 </script>
 
@@ -157,23 +162,24 @@ hr {
   gap: 0.5rem;
 }
 
-.change-photo {
+.change-photo,
+.remove-photo {
+  display: inline-block; /* Damit sie nebeneinander oder untereinander mit Abstand angezeigt werden */
   background-color: #e5e7eb;
   border: none;
   padding: 0.4rem 0.8rem;
   border-radius: 6px;
   cursor: pointer;
   font-size: 0.9rem;
+  text-decoration: none; /* Entfernt die Standard-Unterstreichung von Links */
+  color: inherit; /* Verwendet die Textfarbe des übergeordneten Elements */
+  text-align: center; /* Zentriert den Text innerhalb des "Buttons" */
 }
 
 .remove-photo {
   background-color: transparent;
   color: #dc2626;
   border: 1px solid #dc2626;
-  padding: 0.4rem 0.8rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.9rem;
 }
 
 .field-group {

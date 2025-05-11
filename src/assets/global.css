@@ -1,0 +1,25 @@
+:root {
+  --text-primary: #333333; /* Dunkles Grau für Text */
+  --text-secondary: #888888; /* Helles Grau für sekundären Text */
+  --bg-primary: #ffffff; /* Weiß für Hintergrund */
+  --bg-secondary: #f7f7f7; /* Helles Grau für sekundären Hintergrund */
+  --border-color: #e0e0e0; /* Hellgrau für Border */
+  --primary-color: #3b82f6; /* Blau für primäre Akzentfarbe */
+  --secondary-color: #d1d5db; /* Helles Blau für sekundäre Akzentfarbe */
+  --error-color: #ef4444; /* Rot für Fehler */
+  --success-color: #10b981; /* Grün für Erfolg */
+  --input-focus-color: #3b82f6; /* Blau für fokussierte Eingabefelder */
+  --shadow-color: rgba(0, 0, 0, 0.1); /* Schattenfarbe */
+}
+
+.nav-item-content {
+  display: flex;
+  align-items: center;
+}
+
+.nav-icon {
+  margin-right: 0.75rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+}

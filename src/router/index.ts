@@ -1,72 +1,92 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import ToDoList from '../components/ToDoList.vue';
-import AddTaskOverlay from '../components/AddTaskOverlay.vue';
-import LoginForm from '../components/LoginForm.vue';
-import RegisterForm from '../components/RegisterForm.vue';
-import ProfileSetup from "../components/ProfileSetup.vue";
-import TodaysTasks from '../components/TodaysTasks.vue';
-import UpcomingTasks from '../components/UpcomingTasks.vue';
-import CompletedTasks from '../components/CompletedTasks.vue';
-import TaskSearch from '../components/TaskSearch.vue';
-import UserSettings from '../components/UserSettings.vue'; // UserSettings importiert
+import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '../stores/AuthStore'
+
+// Layout
+import AppLayout from '../components/Layout/AppLayout.vue'
+
+// Auth pages
+import LoginForm from "@/components/Auth/LoginForm.vue";
+import RegisterForm from "@/components/Auth/RegisterForm.vue";
+
+// Task pages
+import TaskList from '@/components/Task/TaskList.vue';
+import TodaysTasksView from "@/components/Task/TodaysTasksView.vue";
+import UpcomingTasksView from "@/components/Task/UpcomingTasksView.vue";
+import CompletedTasks from "@/components/Task/CompletedTasks.vue";
+
+// User pages
+import UserSettings from "@/components/Settings/UserSettings.vue";
+import AccountSettings from "@/components/Settings/AccountSettings.vue";
 
 const routes = [
   {
-    path: '/',
-    name: 'ToDoList',
-    component: ToDoList,
-  },
-  {
-    path: '/add',
-    name: 'AddToDo',
-    component: AddTaskOverlay,
-  },
-  {
     path: '/login',
-    name: 'Login',
+    name: 'login',
     component: LoginForm,
+    meta: { requiresAuth: false }
   },
   {
     path: '/register',
-    name: 'Register',
+    name: 'register',
     component: RegisterForm,
+    meta: { requiresAuth: false }
   },
   {
-    path: '/profile',
-    name: 'YourProfile',
-    component: ProfileSetup,
-  },
-  {
-    path: '/todays-tasks',
-    name: 'TodaysTasks',
-    component: TodaysTasks,
-    props: { msg: 'Heutige Aufgaben' }
-  },
-  {
-    path: '/upcoming-tasks',
-    name: 'UpcomingTasks',
-    component: UpcomingTasks,
-  },
-  {
-    path: '/completed-tasks',
-    name: 'CompletedTasks',
-    component: CompletedTasks,
-  },
-  {
-    path: '/search-tasks',
-    name: 'TaskSearch',
-    component: TaskSearch,
-  },
-  {
-    path: '/settings', // Hier ändern wir den Pfad auf /settings
-    name: 'Settings',  // Name auch angepasst
-    component: UserSettings, // Die UserSettings-Komponente
-  },
-];
+    path: '/',
+    component: AppLayout,
+    meta: { requiresAuth: true },
+    children: [
+      {
+        path: '',
+        name: 'tasks',
+        component: TaskList
+      },
+      {
+        path: 'todays-tasks',
+        name: 'todays-tasks',
+        component: TodaysTasksView
+      },
+      {
+        path: 'upcoming-tasks',
+        name: 'upcoming-tasks',
+        component: UpcomingTasksView
+      },
+      {
+        path: 'completed-tasks',
+        name: 'completed-tasks',
+        component: CompletedTasks
+      },
+      {
+        path: 'settings',
+        name: 'settings',
+        component: AccountSettings,
+      },
+      {
+        path: 'profile',
+        name: 'profile',
+        component: UserSettings
+      }
+    ]
+  }
+]
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
-  routes,
-});
+  history: createWebHistory(),
+  routes
+})
 
-export default router;
+// Navigation guard
+router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore()
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
+
+  if (requiresAuth && !authStore.isAuthenticated) {
+    next('/login')
+  } else if (!requiresAuth && authStore.isAuthenticated) {
+    next('/')
+  } else {
+    next()
+  }
+})
+
+export default router

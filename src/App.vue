@@ -1,139 +1,56 @@
 <template>
-  <div class="app-layout">
-    <button @click="toggleSidebar" :class="['sidebar-toggle', { 'shifted': isSidebarOpen }]">
-      ☰
-    </button>
-
-    <aside :class="['sidebar', { 'sidebar-open': isSidebarOpen }]">
-      <img alt="ToDo Logo" class="logo" src="@/assets/todo-logo.png" width="80" />
-      <nav>
-        <RouterLink to="/" class="nav-link"><i class="fas fa-list"></i> ToDos</RouterLink>
-        <button class="nav-link" @click="openAddTaskOverlay">
-          <i class="fas fa-plus-circle"></i> AddTask
-        </button>
-        <RouterLink to="/todays-tasks" class="nav-link"><i class="fas fa-calendar-day"></i> Heute</RouterLink>
-        <RouterLink to="/upcoming-tasks" class="nav-link"><i class="fas fa-hourglass-half"></i> Bald</RouterLink>
-        <RouterLink to="/completed-tasks" class="nav-link"><i class="fas fa-check-circle"></i> Erledigt</RouterLink>
-        <button class="nav-link" @click="openSearchOverlay">
-          <i class="fas fa-search"></i> Suche
-        </button>
-        <RouterLink to="/settings" class="nav-link"><i class="fas fa-cogs"></i> Settings</RouterLink>
-        <RouterLink to="/profile" class="nav-link"><i class="fas fa-user"></i> Profil</RouterLink>
-      </nav>
-    </aside>
-
-    <main>
-      <RouterView />
-    </main>
-
-    <AddTaskOverlay ref="addTaskOverlayRef" />
-    <SearchOverlay ref="searchOverlayRef" />
+  <div :class="isDarkMode ? 'dark' : 'light'">
+    <router-view /> <!-- Dies ist der Platz, an dem die Routen angezeigt werden -->
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import AddTaskOverlay from './components/AddTaskOverlay.vue'
-import SearchOverlay from './components/SearchOverlay.vue'
-import { RouterLink, RouterView } from 'vue-router'
+import { ref, provide } from 'vue'
+import { useAuthStore } from './stores/AuthStore'
+import { useTaskStore } from './stores/TaskStore'
 
-const isSidebarOpen = ref(false)
-const searchOverlayRef = ref<InstanceType<typeof SearchOverlay> | null>(null)
-const addTaskOverlayRef = ref<InstanceType<typeof AddTaskOverlay> | null>(null)
-
-function toggleSidebar() {
-  isSidebarOpen.value = !isSidebarOpen.value
+// Theme toggling
+const isDarkMode = ref(false)
+const toggleTheme = () => {
+  isDarkMode.value = !isDarkMode.value
+  // Speichern des Themas im localStorage
+  localStorage.setItem('theme', isDarkMode.value ? 'dark' : 'light')
 }
 
-function openSearchOverlay() {
-  searchOverlayRef.value?.open()
+// Theme beim Laden aus localStorage setzen
+if (localStorage.getItem('theme') === 'dark') {
+  isDarkMode.value = true
 }
 
-function openAddTaskOverlay() {
-  addTaskOverlayRef.value?.open()
-}
+// Provide Auth and Task stores globally
+const auth = useAuthStore()
+const tasks = useTaskStore()
+
+provide('auth', auth)
+provide('tasks', tasks)
 </script>
 
-<style scoped>
-.app-layout {
-  display: flex;
-  min-height: 100vh;
+<style>
+/* Theme styles */
+body,
+html {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
-.sidebar-toggle {
-  position: fixed;
-  top: 1rem;
-  left: 1rem;
-  z-index: 100;
-  background-color: white;
-  border: none;
-  font-size: 2rem;
-  padding: 0.4rem 0.8rem;
-  cursor: pointer;
-  border-radius: 5px;
-  transition: left 0.3s ease;
+.light {
+  background-color: #f9fafb;
+  color: #111827;
 }
 
-.sidebar-toggle.shifted {
-  left: 240px;
+.dark {
+  background-color: #111827;
+  color: #f9fafb;
 }
 
-.sidebar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 220px;
-  height: 100vh;
-  background-color: #f5f5f5;
-  padding: 1rem;
-  transform: translateX(-100%);
-  transition: transform 0.3s ease;
-  display: flex;
-  flex-direction: column;
-  z-index: 99;
-  overflow-y: auto;
-}
-
-.sidebar-open {
-  transform: translateX(0);
-}
-
-.sidebar nav {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.nav-link {
-  text-decoration: none;
-  color: #333;
-  font-weight: bold;
-  font-size: 1.2rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: none;
-  border: none;
-  cursor: pointer;
-  text-align: left;
-}
-
-.nav-link.router-link-exact-active {
-  color: #42b983;
-  text-decoration: underline;
-}
-
-main {
-  flex: 1;
-  padding: 2rem;
-  margin-left: 0;
-  transition: margin-left 0.3s ease;
-}
-
-@media (min-width: 769px) {
-  .sidebar-open + main {
-    margin-left: 220px;
-  }
-}
+/* Weitere Styles für Animationen */
 </style>
