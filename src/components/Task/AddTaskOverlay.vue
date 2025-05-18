@@ -41,6 +41,16 @@
         </div>
 
         <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Benutzer</label>
+          <input
+            type="text"
+            v-model="user"
+            placeholder="Benutzername (optional)"
+            class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent input"
+          />
+        </div>
+
+        <div class="mb-4">
           <label class="block text-sm font-medium text-gray-700 mb-1">Priority</label>
           <select
             v-model="priority"
@@ -94,7 +104,13 @@ import { defineEmits } from 'vue'
 
 // Define the custom event
 const emit = defineEmits<{
-  (e: 'add-task', task: { title: string; dueDate: string; priority: number; reminder: string }): void
+  (e: 'add-task', task: {
+    title: string
+    dueDate: string
+    priority: number
+    reminder: string
+    user?: string
+  }): void
   (e: 'close'): void
 }>()
 
@@ -104,6 +120,8 @@ let title = ''
 let dueDate = ''
 let priority = ''
 let reminder = ''
+let user = ''
+
 
 // Method to handle form submission
 const handleSubmit = () => {
@@ -125,6 +143,7 @@ const onClose = () => {
   dueDate = '';
   priority = '';
   reminder = '';
+  user = ''
 };
 </script>
 

@@ -1,4 +1,12 @@
 import { defineStore } from 'pinia'
+import {
+  getAllTasks,
+  createTask as createTaskApi,
+  deleteTask as deleteTaskApi,
+  markComplete as markCompleteApi
+} from '@/services/TaskApi' // ✅ Pfad ggf. anpassen
+import { updateTask as updateTaskApi } from '@/services/TaskApi'
+
 
 export interface Task {
   id: number
@@ -8,7 +16,7 @@ export interface Task {
   completed: boolean
   createdAt: string
   completedAt?: string
-  dueDate?: Date
+  dueDate?: string | null
   recurring?: string // z.B. 'daily', 'weekly'
   status?: string    // z.B. 'open', 'in progress', 'done'
   user?: string      // z.B. Benutzername oder ID
@@ -22,24 +30,15 @@ export const useTaskStore = defineStore('task', {
   actions: {
     async loadTasks() {
       try {
-        const res = await fetch(import.meta.env.VITE_BACKEND_BASE_URL + '/task')
-        if (!res.ok) throw new Error('Fehler beim Laden der Aufgaben')
-        const data: Task[] = await res.json()
-        this.tasks = data
+        this.tasks = await getAllTasks()
       } catch (err) {
-        console.error('Laden fehlgeschlagen:', err)
+        console.error('Fehler beim Laden:', err)
       }
     },
 
     async addTask(task: Omit<Task, 'id' | 'createdAt' | 'completed'>) {
       try {
-        const res = await fetch(import.meta.env.VITE_BACKEND_BASE_URL + '/task', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(task),
-        })
-        if (!res.ok) throw new Error('Fehler beim Erstellen')
-        const created = await res.json()
+        const created = await createTaskApi(task)
         this.tasks.push(created)
       } catch (err) {
         console.error('Fehler beim Hinzufügen:', err)
@@ -48,10 +47,7 @@ export const useTaskStore = defineStore('task', {
 
     async deleteTask(id: number) {
       try {
-        const res = await fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/task/${id}`, {
-          method: 'DELETE',
-        })
-        if (!res.ok) throw new Error('Fehler beim Löschen')
+        await deleteTaskApi(id)
         this.tasks = this.tasks.filter(t => t.id !== id)
       } catch (err) {
         console.error('Fehler beim Löschen:', err)
@@ -59,37 +55,39 @@ export const useTaskStore = defineStore('task', {
     },
 
     async completeTask(id: number) {
-      const task = this.tasks.find(t => t.id === id)
-      if (!task) return
-
       try {
-        const updated = { ...task, completed: !task.completed }
-        const res = await fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/task/${id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(updated),
-        })
-        if (!res.ok) throw new Error('Fehler beim Aktualisieren')
-        const returned = await res.json()
+        const updated = await markCompleteApi(id)
         const index = this.tasks.findIndex(t => t.id === id)
-        this.tasks[index] = returned
+        if (index !== -1) this.tasks[index] = updated
       } catch (err) {
         console.error('Fehler beim Aktualisieren:', err)
       }
     },
 
-    // Beispiel: Filter für "Heute"
+    async editTask(updatedTask: Task) {
+      try {
+        const savedTask = await updateTaskApi(updatedTask)
+        const index = this.tasks.findIndex(t => t.id === savedTask.id)
+        if (index !== -1) {
+          this.tasks[index] = savedTask
+        }
+      } catch (err) {
+        console.error('Fehler beim Bearbeiten:', err)
+      }
+    },
+
+    // 🔹 Beispiel: Filter für "Heute"
     getTodayTasks(): Task[] {
       const today = new Date().toISOString().split('T')[0]
       return this.tasks.filter(t => t.dueDate && new Date(t.dueDate).toISOString().startsWith(today))
     },
 
-    // Beispiel: Filter für "Erledigt"
+    // 🔹 Beispiel: Filter für "Erledigt"
     getCompletedTasks(): Task[] {
       return this.tasks.filter(t => t.completed)
     },
 
-    // Beispiel: Filter für "Upcoming"
+    // 🔹 Beispiel: Filter für "Bevorstehend"
     getUpcomingTasks(): Task[] {
       const now = new Date()
       return this.tasks.filter(t => t.dueDate && new Date(t.dueDate) > now && !t.completed)

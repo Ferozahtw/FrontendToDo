@@ -24,6 +24,7 @@
     </div>
 
     <div class="task-content">
+      <p v-if="task.user" class="user">Benutzer: {{ task.user }}</p>
       <p :class="{ 'completed-task': isCompleted, 'task-title': !isCompleted }">
         {{ task.title }}
       </p>
@@ -47,20 +48,28 @@
       </div>
     </div>
 
-    <button @click="confirmDelete" class="delete-icon" aria-label="Delete task">
-      <Trash2 class="w-5 h-5" />
-    </button>
+    <!-- Action Buttons -->
+    <div class="flex items-center ml-4">
+      <button @click="startEdit" class="text-blue-500 hover:text-blue-700 mr-2" aria-label="Edit task">✏️</button>
+      <button @click="confirmDelete" class="delete-icon" aria-label="Delete task">
+        <Trash2 class="w-5 h-5" />
+      </button>
+    </div>
 
     <div v-if="isConfirmingDelete" class="delete-actions">
       <button @click="cancelDelete" class="cancel-delete-btn">Cancel</button>
       <button @click="handleDelete" class="delete-btn">Delete</button>
     </div>
+
+    <!-- Edit Modal -->
+    <EditTaskModal v-if="isEditing" :task="task" @close="isEditing = false" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { Trash2 } from 'lucide-vue-next'
 import { ref, computed } from 'vue'
+import EditTaskModal from '@/components/EditTaskModal.vue' // ✅ Pfad ggf. anpassen
 
 const props = defineProps({
   task: {
@@ -82,6 +91,7 @@ const props = defineProps({
 })
 
 const isConfirmingDelete = ref(false)
+const isEditing = ref(false)
 
 const handleComplete = () => {
   if (!props.isCompleted && props.onComplete) {
@@ -99,6 +109,10 @@ const cancelDelete = () => {
 
 const handleDelete = () => {
   props.onDelete(props.task.id)
+}
+
+const startEdit = () => {
+  isEditing.value = true
 }
 
 const priorityCircleStyle = computed(() => {
@@ -124,11 +138,9 @@ const priorityCircleStyle = computed(() => {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   transition: transform 0.2s ease;
 }
-
 .task-item:hover {
   transform: translateY(-2px);
 }
-
 .priority-circle {
   width: 1.25rem;
   height: 1.25rem;
@@ -139,7 +151,6 @@ const priorityCircleStyle = computed(() => {
   margin-right: 1rem;
   flex-shrink: 0;
 }
-
 .priority-circle-inner {
   width: 100%;
   height: 100%;
@@ -148,49 +159,49 @@ const priorityCircleStyle = computed(() => {
   align-items: center;
   justify-content: center;
 }
-
 .priority-circle-inner.bg-green-500 {
-  background-color: #4caf50; /* Grün für erledigte Aufgaben */
+  background-color: #4caf50;
 }
-
 .task-content {
   flex-grow: 1;
 }
-
 .task-title {
   font-weight: 600;
   font-size: 1rem;
   color: #111827;
   margin-bottom: 0.25rem;
 }
-
 .completed-task {
   text-decoration: line-through;
   color: #6b7280;
 }
-
-.due-date {
+.due-date, .description, .recurring, .status {
+  font-size: 0.875rem;
   color: #6b7280;
+  margin-top: 0.25rem;
+}
+.attachments {
+  margin-top: 0.5rem;
+}
+.attachments a {
+  color: #3b82f6;
+  text-decoration: underline;
   font-size: 0.875rem;
 }
-
 .delete-icon {
   color: #9ca3af;
   margin-left: 1rem;
   cursor: pointer;
   transition: color 0.3s ease;
 }
-
 .delete-icon:hover {
   color: #ef4444;
 }
-
 .delete-actions {
   display: flex;
   gap: 0.5rem;
   margin-left: 1rem;
 }
-
 .cancel-delete-btn,
 .delete-btn {
   padding: 0.25rem 0.5rem;
@@ -198,46 +209,22 @@ const priorityCircleStyle = computed(() => {
   border-radius: 0.25rem;
   cursor: pointer;
 }
-
 .cancel-delete-btn {
   background-color: #e5e7eb;
   color: #1f2937;
 }
-
 .delete-btn {
   background-color: #f87171;
   color: white;
 }
-
 .delete-btn:hover {
   background-color: #ef4444;
 }
 
-/* Bestehende Styles bleiben gleich, hier nur Ergänzungen: */
-.description, .recurring, .status {
+.user {
   font-size: 0.875rem;
   color: #6b7280;
   margin-top: 0.25rem;
 }
 
-.attachments {
-  margin-top: 0.5rem;
-}
-
-.attachments a {
-  color: #3b82f6;
-  text-decoration: underline;
-  font-size: 0.875rem;
-}
-
-.w-4 { width: 1rem; }
-.h-4 { height: 1rem; }
-.text-white { color: #fff; }
-.fill-none { fill: none; }
-.viewBox { /* Du kannst das ViewBox-Attribut direkt im SVG lassen */ }
-.stroke-currentColor { stroke: currentColor; }
-.stroke-linecap-round { stroke-linecap: round; }
-.stroke-linejoin-round { stroke-linejoin: round; }
-.stroke-width-2 { stroke-width: 2; }
-.d-path { /* Du kannst das d-Attribut direkt im SVG lassen */ }
 </style>
