@@ -5,12 +5,19 @@
     <!-- Neue Aufgabe hinzufügen -->
     <form @submit="handleAddTask" class="task-form">
       <input type="text" placeholder="Task title" v-model="title" class="task-input" required />
+      <textarea placeholder="Description" v-model="description" class="task-input" rows="2"></textarea>
+
       <div class="task-form-options">
         <input type="date" v-model="dueDate" class="task-date-input" required />
         <select v-model="priority" class="task-priority-select">
           <option value="1">High</option>
           <option value="2">Medium</option>
           <option value="3">Low</option>
+        </select>
+        <select v-model="recurring" class="task-priority-select">
+          <option value="none">One-time</option>
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
         </select>
         <button type="submit" class="add-task-btn">Add Task</button>
       </div>
@@ -47,44 +54,50 @@
 import { ref, computed } from 'vue'
 import { ChevronDown, ChevronUp } from 'lucide-vue-next'
 import TaskItem from './TaskItem.vue'
-import { useTaskStore } from '@/stores/TaskStore.ts' // Passe den Pfad an, falls nötig
+import { useTaskStore } from '@/stores/TaskStore.ts'
 
 const taskStore = useTaskStore()
 
 const title = ref('')
+const description = ref('')
 const priority = ref(2)
 const dueDate = ref('')
+const recurring = ref('none') // z. B. 'daily', 'weekly', etc.
 const tasksVisible = ref(true)
 
 const sortedTasks = computed(() => {
-  return [...taskStore.tasks].sort((a, b) => a.priority - b.priority)
+  return [...taskStore.tasks].sort((a, b) => (a.priority ?? 0) - (b.priority ?? 0))
 })
 
 function toggleTasks() {
   tasksVisible.value = !tasksVisible.value
 }
 
-function handleAddTask(event: Event) {
+async function handleAddTask(event: Event) {
   event.preventDefault()
   if (!title.value.trim() || !dueDate.value) return
 
-  taskStore.addTask({
+  await taskStore.addTask({
     title: title.value.trim(),
+    description: description.value.trim(),
     priority: priority.value,
-    dueDate: new Date(dueDate.value), // ✅ convert string to Date
+    dueDate: new Date(dueDate.value),
+    recurring: recurring.value,
   })
 
   title.value = ''
+  description.value = ''
   priority.value = 2
   dueDate.value = ''
+  recurring.value = 'none'
 }
 
-function completeTask(taskId: string) {
-  taskStore.completeTask(taskId)
+async function completeTask(taskId: string) {
+  await taskStore.completeTask(parseInt(taskId))
 }
 
-function deleteTask(taskId: string) {
-  taskStore.deleteTask(taskId)
+async function deleteTask(taskId: string) {
+  await taskStore.deleteTask(parseInt(taskId))
 }
 </script>
 

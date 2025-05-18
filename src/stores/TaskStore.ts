@@ -1,89 +1,98 @@
 import { defineStore } from 'pinia'
 
-interface Task {
-  id: string
+export interface Task {
+  id: number
   title: string
+  description?: string
   priority: number
   completed: boolean
   createdAt: string
   completedAt?: string
-  dueDate?: Date // Hier ändern wir es zu Date
-}
-
-function generateId(): string {
-  return Math.random().toString(36).substr(2, 9)
+  dueDate?: Date
+  recurring?: string // z.B. 'daily', 'weekly'
+  status?: string    // z.B. 'open', 'in progress', 'done'
+  user?: string      // z.B. Benutzername oder ID
 }
 
 export const useTaskStore = defineStore('task', {
   state: () => ({
-    tasks: [
-      {
-        id: '1',
-        title: 'Create project presentation',
-        priority: 1,
-        completed: false,
-        createdAt: new Date().toISOString(),
-        dueDate: new Date(), // Ändere es hier zu Date
-      },
-      {
-        id: '2',
-        title: 'Review team feedback',
-        priority: 2,
-        completed: false,
-        createdAt: new Date().toISOString(),
-        dueDate: new Date(),
-      },
-      {
-        id: '3',
-        title: 'Update documentation',
-        priority: 3,
-        completed: false,
-        createdAt: new Date().toISOString(),
-        dueDate: new Date(Date.now() + 86400000), // Ändere es zu Date
-      },
-      {
-        id: '4',
-        title: 'Setup development environment',
-        priority: 1,
-        completed: false,
-        createdAt: new Date().toISOString(),
-        dueDate: new Date(Date.now() + 172800000), // Ändere es zu Date
-      },
-    ] as Task[],
-    completedTasks: [
-      {
-        id: '5',
-        title: 'Initial project setup',
-        priority: 2,
-        completed: true,
-        createdAt: new Date(Date.now() - 172800000).toISOString(),
-        completedAt: new Date(Date.now() - 86400000).toISOString(),
-        dueDate: new Date(Date.now() - 86400000), // Ändere es zu Date
-      },
-    ] as Task[],
+    tasks: [] as Task[],
   }),
+
   actions: {
-    addTask(taskData: Omit<Task, 'id' | 'completed' | 'createdAt'>) {
-      const newTask: Task = {
-        id: generateId(),
-        ...taskData,
-        completed: false,
-        createdAt: new Date().toISOString(),
-      }
-      this.tasks.push(newTask)
-    },
-    completeTask(taskId: string) {
-      const index = this.tasks.findIndex((task) => task.id === taskId)
-      if (index !== -1) {
-        const task = this.tasks.splice(index, 1)[0]
-        task.completed = true
-        task.completedAt = new Date().toISOString()
-        this.completedTasks.push(task)
+    async loadTasks() {
+      try {
+        const res = await fetch(import.meta.env.VITE_BACKEND_BASE_URL + '/task')
+        if (!res.ok) throw new Error('Fehler beim Laden der Aufgaben')
+        const data: Task[] = await res.json()
+        this.tasks = data
+      } catch (err) {
+        console.error('Laden fehlgeschlagen:', err)
       }
     },
-    deleteTask(taskId: string) {
-      this.tasks = this.tasks.filter((task) => task.id !== taskId)
-      this.completedTasks = this.completedTasks.filter((task) => task.id !== taskId)
+
+    async addTask(task: Omit<Task, 'id' | 'createdAt' | 'completed'>) {
+      try {
+        const res = await fetch(import.meta.env.VITE_BACKEND_BASE_URL + '/task', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(task),
+        })
+        if (!res.ok) throw new Error('Fehler beim Erstellen')
+        const created = await res.json()
+        this.tasks.push(created)
+      } catch (err) {
+        console.error('Fehler beim Hinzufügen:', err)
+      }
+    },
+
+    async deleteTask(id: number) {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/task/${id}`, {
+          method: 'DELETE',
+        })
+        if (!res.ok) throw new Error('Fehler beim Löschen')
+        this.tasks = this.tasks.filter(t => t.id !== id)
+      } catch (err) {
+        console.error('Fehler beim Löschen:', err)
+      }
+    },
+
+    async completeTask(id: number) {
+      const task = this.tasks.find(t => t.id === id)
+      if (!task) return
+
+      try {
+        const updated = { ...task, completed: !task.completed }
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/task/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updated),
+        })
+        if (!res.ok) throw new Error('Fehler beim Aktualisieren')
+        const returned = await res.json()
+        const index = this.tasks.findIndex(t => t.id === id)
+        this.tasks[index] = returned
+      } catch (err) {
+        console.error('Fehler beim Aktualisieren:', err)
+      }
+    },
+
+    // Beispiel: Filter für "Heute"
+    getTodayTasks(): Task[] {
+      const today = new Date().toISOString().split('T')[0]
+      return this.tasks.filter(t => t.dueDate && new Date(t.dueDate).toISOString().startsWith(today))
+    },
+
+    // Beispiel: Filter für "Erledigt"
+    getCompletedTasks(): Task[] {
+      return this.tasks.filter(t => t.completed)
+    },
+
+    // Beispiel: Filter für "Upcoming"
+    getUpcomingTasks(): Task[] {
+      const now = new Date()
+      return this.tasks.filter(t => t.dueDate && new Date(t.dueDate) > now && !t.completed)
     },
   },
 })

@@ -27,9 +27,24 @@
       <p :class="{ 'completed-task': isCompleted, 'task-title': !isCompleted }">
         {{ task.title }}
       </p>
+      <p v-if="task.description" class="description">{{ task.description }}</p>
       <p v-if="task.dueDate" class="due-date">
         Due: {{ new Date(task.dueDate).toLocaleDateString() }}
       </p>
+      <p v-if="task.recurring" class="recurring">
+        Repeats: {{ task.recurring }}
+      </p>
+      <p v-if="task.status" class="status">
+        Status: {{ task.status }}
+      </p>
+      <div v-if="task.attachments?.length" class="attachments">
+        <p>Attachments:</p>
+        <ul>
+          <li v-for="(file, index) in task.attachments" :key="index">
+            <a :href="file" target="_blank">{{ file }}</a>
+          </li>
+        </ul>
+      </div>
     </div>
 
     <button @click="confirmDelete" class="delete-icon" aria-label="Delete task">
@@ -88,11 +103,11 @@ const handleDelete = () => {
 
 const priorityCircleStyle = computed(() => {
   switch (props.task.priority) {
-    case 1: return { backgroundColor: '#f44336' } // Rot
-    case 2: return { backgroundColor: '#ff9800' } // Orange
-    case 3: return { backgroundColor: '#4caf50' } // Grün (etwas anders als Gelb, ähnelt dem Foto)
-    case 4: return { backgroundColor: '#9e9e9e' } // Grau
-    default: return { backgroundColor: '#e0e0e0' } // Hellgrau
+    case 1: return { backgroundColor: '#f44336' }
+    case 2: return { backgroundColor: '#ff9800' }
+    case 3: return { backgroundColor: '#4caf50' }
+    case 4: return { backgroundColor: '#9e9e9e' }
+    default: return { backgroundColor: '#e0e0e0' }
   }
 })
 </script>
@@ -196,6 +211,23 @@ const priorityCircleStyle = computed(() => {
 
 .delete-btn:hover {
   background-color: #ef4444;
+}
+
+/* Bestehende Styles bleiben gleich, hier nur Ergänzungen: */
+.description, .recurring, .status {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+
+.attachments {
+  margin-top: 0.5rem;
+}
+
+.attachments a {
+  color: #3b82f6;
+  text-decoration: underline;
+  font-size: 0.875rem;
 }
 
 .w-4 { width: 1rem; }

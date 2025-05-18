@@ -8,6 +8,12 @@
 import { ref, provide } from 'vue'
 import { useAuthStore } from './stores/AuthStore'
 import { useTaskStore } from './stores/TaskStore'
+import { onMounted } from 'vue'
+
+onMounted(() => {
+  tasks.loadTasks()
+})
+
 
 // Theme toggling
 const isDarkMode = ref(false)
