@@ -33,7 +33,6 @@ import SidebarToggle from './SidebarToggle.vue'
 import AddTaskOverlay from '../Task/AddTaskOverlay.vue'
 import SearchOverlay from '../Search/SearchOverlay.vue'
 import { useTaskStore } from '@/stores/TaskStore'
-import { storeToRefs } from 'pinia'
 
 // Reactive States
 const isSidebarOpen = ref(false)
@@ -46,11 +45,12 @@ const isDarkMode = inject('isDarkMode') as Ref<boolean>
 
 // Access the Task Store
 const taskStore = useTaskStore()
-const { completedTasks } = storeToRefs(taskStore)
+const completedTasks = computed(() => taskStore.getCompletedTasks())
+
 
 // Method to delete a task from the store
-const deleteTaskFromStore = (taskId: string) => {
-  taskStore.deleteTask(taskId)
+const deleteTaskFromStore = (taskId: string | number) => {
+  taskStore.deleteTask(Number(taskId))
 }
 
 // Methods to open/close overlays
