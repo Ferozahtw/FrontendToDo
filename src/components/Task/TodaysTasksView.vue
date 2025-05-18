@@ -54,11 +54,11 @@ function toggleTasks() {
 }
 
 function completeTask(taskId: string) {
-  taskStore.completeTask(taskId)
+  taskStore.completeTask(Number(taskId))
 }
 
 function deleteTask(taskId: string) {
-  taskStore.deleteTask(taskId)
+  taskStore.deleteTask(Number(taskId))
 }
 </script>
 
