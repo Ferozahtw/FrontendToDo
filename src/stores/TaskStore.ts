@@ -3,10 +3,9 @@ import {
   getAllTasks,
   createTask as createTaskApi,
   deleteTask as deleteTaskApi,
-  markComplete as markCompleteApi
-} from '@/services/TaskApi' // ✅ Pfad ggf. anpassen
-import { updateTask as updateTaskApi } from '@/services/TaskApi'
-
+  markComplete as markCompleteApi,
+  updateTask as updateTaskApi
+} from '@/services/TaskApi'
 
 export interface Task {
   id: number
@@ -17,80 +16,110 @@ export interface Task {
   createdAt: string
   completedAt?: string
   dueDate?: string | null
-  recurring?: string // z.B. 'daily', 'weekly'
-  status?: string    // z.B. 'open', 'in progress', 'done'
-  user?: string      // z.B. Benutzername oder ID
+  recurrence?: string
+  status?: string
+  user?: string
 }
 
 export const useTaskStore = defineStore('task', {
   state: () => ({
     tasks: [] as Task[],
+    loading: false,
+    error: null as string | null,
   }),
 
   actions: {
     async loadTasks() {
+      this.loading = true
+      this.error = null
       try {
         this.tasks = await getAllTasks()
-      } catch (err) {
-        console.error('Fehler beim Laden:', err)
+      } catch (err: unknown) {
+        this.error = 'Fehler beim Laden der Aufgaben'
+        console.error(err)
+      } finally {
+        this.loading = false
       }
     },
 
     async addTask(task: Omit<Task, 'id' | 'createdAt' | 'completed'>) {
+      this.loading = true
+      this.error = null
       try {
         const created = await createTaskApi(task)
         this.tasks.push(created)
-      } catch (err) {
-        console.error('Fehler beim Hinzufügen:', err)
+      } catch (err: unknown) {
+        this.error = 'Fehler beim Hinzufügen'
+        console.error(err)
+      } finally {
+        this.loading = false
       }
     },
 
     async deleteTask(id: number) {
+      this.loading = true
+      this.error = null
       try {
         await deleteTaskApi(id)
         this.tasks = this.tasks.filter(t => t.id !== id)
-      } catch (err) {
-        console.error('Fehler beim Löschen:', err)
+      } catch (err: unknown) {
+        this.error = 'Fehler beim Löschen'
+        console.error(err)
+      } finally {
+        this.loading = false
       }
     },
 
     async completeTask(id: number) {
+      this.loading = true
+      this.error = null
       try {
         const updated = await markCompleteApi(id)
         const index = this.tasks.findIndex(t => t.id === id)
         if (index !== -1) this.tasks[index] = updated
-      } catch (err) {
-        console.error('Fehler beim Aktualisieren:', err)
+      } catch (err: unknown) {
+        this.error = 'Fehler beim Abschließen'
+        console.error(err)
+      } finally {
+        this.loading = false
       }
     },
 
     async editTask(updatedTask: Task) {
+      this.loading = true
+      this.error = null
       try {
         const savedTask = await updateTaskApi(updatedTask)
         const index = this.tasks.findIndex(t => t.id === savedTask.id)
-        if (index !== -1) {
-          this.tasks[index] = savedTask
-        }
-      } catch (err) {
-        console.error('Fehler beim Bearbeiten:', err)
+        if (index !== -1) this.tasks[index] = savedTask
+      } catch (err: unknown) {
+        this.error = 'Fehler beim Bearbeiten'
+        console.error(err)
+      } finally {
+        this.loading = false
       }
     },
 
-    // 🔹 Beispiel: Filter für "Heute"
     getTodayTasks(): Task[] {
       const today = new Date().toISOString().split('T')[0]
-      return this.tasks.filter(t => t.dueDate && new Date(t.dueDate).toISOString().startsWith(today))
+      return this.tasks
+        .filter(t => {
+          if (!t.dueDate) return false
+          const due = new Date(t.dueDate)
+          return !isNaN(due.getTime()) && due.toISOString().startsWith(today)
+        })
+        .sort((a, b) => a.priority - b.priority)
     },
 
-    // 🔹 Beispiel: Filter für "Erledigt"
     getCompletedTasks(): Task[] {
       return this.tasks.filter(t => t.completed)
     },
 
-    // 🔹 Beispiel: Filter für "Bevorstehend"
     getUpcomingTasks(): Task[] {
       const now = new Date()
-      return this.tasks.filter(t => t.dueDate && new Date(t.dueDate) > now && !t.completed)
+      return this.tasks
+        .filter(t => t.dueDate && new Date(t.dueDate) > now && !t.completed)
+        .sort((a, b) => new Date(a.dueDate!).getTime() - new Date(b.dueDate!).getTime())
     },
   },
 })
