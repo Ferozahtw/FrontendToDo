@@ -19,6 +19,7 @@ export interface Task {
   recurring?: string
   status?: string
   user?: string
+  attachments?: string[]
 }
 
 export const useTaskStore = defineStore('task', {
