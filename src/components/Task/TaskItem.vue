@@ -70,25 +70,14 @@
 import { Trash2 } from 'lucide-vue-next'
 import { ref, computed } from 'vue'
 import EditTaskModal from '@/components/Task/EditTaskModal.vue'
+import type { Task } from '@/stores/TaskStore'
 
-const props = defineProps({
-  task: {
-    type: Object,
-    required: true,
-  },
-  isCompleted: {
-    type: Boolean,
-    default: false,
-  },
-  onComplete: {
-    type: Function,
-    default: null,
-  },
-  onDelete: {
-    type: Function,
-    required: true,
-  },
-})
+const props = defineProps<{
+  task: Task
+  isCompleted?: boolean
+  onComplete?: (id: number) => void
+  onDelete: (id: number) => void
+}>()
 
 const isConfirmingDelete = ref(false)
 const isEditing = ref(false)

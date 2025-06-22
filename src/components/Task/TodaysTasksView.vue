@@ -53,12 +53,12 @@ function toggleTasks() {
   tasksVisible.value = !tasksVisible.value
 }
 
-function completeTask(taskId: string) {
-  taskStore.completeTask(Number(taskId))
+function completeTask(taskId: number) {
+  taskStore.completeTask(taskId)
 }
 
-function deleteTask(taskId: string) {
-  taskStore.deleteTask(Number(taskId))
+function deleteTask(taskId: number) {
+  taskStore.deleteTask(taskId)
 }
 </script>
 

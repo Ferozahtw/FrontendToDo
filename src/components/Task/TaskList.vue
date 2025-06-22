@@ -92,12 +92,12 @@ async function handleAddTask(event: Event) {
   recurring.value = 'none'
 }
 
-async function completeTask(taskId: string) {
-  await taskStore.completeTask(parseInt(taskId))
+async function completeTask(taskId: number) {
+  await taskStore.completeTask(taskId)
 }
 
-async function deleteTask(taskId: string) {
-  await taskStore.deleteTask(parseInt(taskId))
+async function deleteTask(taskId: number) {
+  await taskStore.deleteTask(taskId)
 }
 </script>
 

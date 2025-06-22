@@ -31,11 +31,7 @@
 import { defineProps, ref, computed } from 'vue'
 import TaskItem from './TaskItem.vue'
 import { ChevronDown, ChevronUp } from 'lucide-vue-next' // ✅ Importiere die Icons
-
-interface Task {
-  id: string | number
-  completedAt: string
-}
+import type { Task } from '@/stores/TaskStore'
 
 const props = defineProps({
   completedTasks: {
@@ -56,7 +52,9 @@ const toggleTasks = () => {
 
 const sortedCompletedTasks = computed(() => {
   return [...props.completedTasks].sort((a, b) => {
-    return new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
+    return (
+      new Date(b.completedAt ?? 0).getTime() - new Date(a.completedAt ?? 0).getTime()
+    )
   })
 })
 </script>

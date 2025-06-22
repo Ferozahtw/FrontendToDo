@@ -74,12 +74,12 @@ function toggleTasks() {
 }
 
 // Task als erledigt markieren
-function completeTask(id: string | number) {
-  taskStore.completeTask(Number(id))
+function completeTask(id: number) {
+  taskStore.completeTask(id)
 }
 
-function deleteTask(id: string | number) {
-  taskStore.deleteTask(Number(id))
+function deleteTask(id: number) {
+  taskStore.deleteTask(id)
 }
 </script>
 

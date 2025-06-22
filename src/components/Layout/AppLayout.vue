@@ -49,8 +49,8 @@ const completedTasks = computed(() => taskStore.getCompletedTasks())
 
 
 // Method to delete a task from the store
-const deleteTaskFromStore = (taskId: string | number) => {
-  taskStore.deleteTask(Number(taskId))
+const deleteTaskFromStore = (taskId: number) => {
+  taskStore.deleteTask(taskId)
 }
 
 // Methods to open/close overlays
