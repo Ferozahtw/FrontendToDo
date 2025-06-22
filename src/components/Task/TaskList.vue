@@ -83,6 +83,8 @@ async function handleAddTask(event: Event) {
     priority: priority.value,
     dueDate: dueDate.value,
     recurring: recurring.value,
+    status: 'offen',
+    user: 'feroza',
   })
 
   title.value = ''
