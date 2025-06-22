@@ -81,7 +81,7 @@ async function handleAddTask(event: Event) {
     title: title.value.trim(),
     description: description.value.trim(),
     priority: priority.value,
-    dueDate: new Date(dueDate.value),
+    dueDate: dueDate.value,
     recurring: recurring.value,
   })
 

@@ -55,17 +55,15 @@ const currentMonthYear = computed(() =>
 const upcomingTasks = computed(() => {
   return taskStore.tasks
     .filter((task) => {
-      const due = task.dueDate
-
-      // Überprüfe, ob dueDate ein gültiges Date-Objekt ist
-      if (!due || !(due instanceof Date) || isNaN(due.getTime())) return false
-
-      due.setHours(0, 0, 0, 0) // Setze Zeit auf Mitternacht
-      return due > today // Vergleiche mit dem heutigen Datum
+      if (!task.dueDate) return false
+      const due = new Date(task.dueDate)
+      if (isNaN(due.getTime())) return false
+      due.setHours(0, 0, 0, 0)
+      return due > today
     })
     .sort((a, b) => {
-      const dateA = a.dueDate ? a.dueDate.getTime() : 0 // Überprüfen, ob dueDate definiert ist
-      const dateB = b.dueDate ? b.dueDate.getTime() : 0 // Überprüfen, ob dueDate definiert ist
+      const dateA = a.dueDate ? new Date(a.dueDate).getTime() : 0
+      const dateB = b.dueDate ? new Date(b.dueDate).getTime() : 0
       return dateA !== dateB ? dateA - dateB : a.priority - b.priority
     })
 })

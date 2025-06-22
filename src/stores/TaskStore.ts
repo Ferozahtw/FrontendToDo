@@ -16,7 +16,7 @@ export interface Task {
   createdAt: string
   completedAt?: string
   dueDate?: string | null
-  recurrence?: string
+  recurring?: string
   status?: string
   user?: string
 }

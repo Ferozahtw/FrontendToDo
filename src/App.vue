@@ -34,6 +34,9 @@ const tasks = useTaskStore()
 
 provide('auth', auth)
 provide('tasks', tasks)
+provide('toggleTheme', toggleTheme)
+provide('isDarkMode', isDarkMode)
+
 </script>
 
 <style>

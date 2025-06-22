@@ -69,7 +69,7 @@
 <script setup lang="ts">
 import { Trash2 } from 'lucide-vue-next'
 import { ref, computed } from 'vue'
-import EditTaskModal from '@/components/EditTaskModal.vue' // ✅ Pfad ggf. anpassen
+import EditTaskModal from '@/components/Task/EditTaskModal.vue'
 
 const props = defineProps({
   task: {
