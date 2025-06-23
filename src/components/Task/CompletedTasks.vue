@@ -34,7 +34,7 @@ import { ChevronDown, ChevronUp } from 'lucide-vue-next' // ✅ Importiere die I
 import type { Task } from '@/stores/TaskStore'
 
 const props = defineProps({
-  completedTasks: {
+  tasksCompleted: {
     type: Array as () => Task[],
     required: true,
   },
@@ -51,7 +51,7 @@ const toggleTasks = () => {
 }
 
 const sortedCompletedTasks = computed(() => {
-  return [...props.completedTasks].sort((a, b) => {
+  return [...props.tasksCompleted].sort((a, b) => {
     return (
       new Date(b.completedAt ?? 0).getTime() - new Date(a.completedAt ?? 0).getTime()
     )

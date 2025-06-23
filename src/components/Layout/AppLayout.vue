@@ -4,7 +4,8 @@
     <AppSidebar
       :isOpen="isSidebarOpen"
       :openAddTaskOverlay="openAddTaskOverlay"
-      :openSearchOverlay="openSearchOverlay" />
+      :openSearchOverlay="openSearchOverlay"
+    />
 
     <main :class="['main-content', { 'sidebar-open': isSidebarOpen }]">
       <div class="content-wrapper">
@@ -15,13 +16,17 @@
         </div>
 
         <router-view
-          :completedTasks="completedTasks"
+          :tasksCompleted="completedTasks"
           :deleteTask="deleteTaskFromStore"
         />
       </div>
     </main>
 
-    <AddTaskOverlay v-if="isAddTaskOpen" @close="closeAddTask" />
+    <AddTaskOverlay
+      v-if="isAddTaskOpen"
+      @add-task="addTaskFromOverlay"
+      @close="closeAddTask"
+    />
     <SearchOverlay v-if="isSearchOpen" @close="closeSearch" />
   </div>
 </template>
@@ -47,7 +52,23 @@ const isDarkMode = inject('isDarkMode') as Ref<boolean>
 const taskStore = useTaskStore()
 const completedTasks = computed(() => taskStore.getCompletedTasks())
 
-
+// Add task from overlay
+const addTaskFromOverlay = async (task: {
+  title: string
+  dueDate: string
+  priority: number
+  reminder: string
+  user?: string
+}) => {
+  await taskStore.addTask({
+    title: task.title,
+    dueDate: task.dueDate,
+    priority: task.priority,
+    recurring: task.reminder,
+    description: '',
+    user: task.user,
+  })
+}
 // Method to delete a task from the store
 const deleteTaskFromStore = (taskId: number) => {
   taskStore.deleteTask(taskId)

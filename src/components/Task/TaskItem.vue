@@ -3,11 +3,10 @@
     <div class="priority-circle" :style="priorityCircleStyle">
       <div
         class="priority-circle-inner"
-        :class="{ 'bg-green-500': isCompleted }"
         @click="handleComplete"
       >
         <svg
-          v-if="isCompleted"
+          v-if="task.completed"
           class="w-4 h-4 text-white"
           fill="none"
           viewBox="0 0 24 24"
@@ -25,8 +24,8 @@
 
     <div class="task-content">
       <p v-if="task.user" class="user">Benutzer: {{ task.user }}</p>
-      <p :class="{ 'completed-task': isCompleted, 'task-title': !isCompleted }">
-        {{ task.title }}
+      <p :class="{ 'completed-task': task.completed, 'task-title': !task.completed }">
+      {{ task.title }}
       </p>
       <p v-if="task.description" class="description">{{ task.description }}</p>
       <p v-if="task.dueDate" class="due-date">
@@ -74,7 +73,6 @@ import type { Task } from '@/stores/TaskStore'
 
 const props = defineProps<{
   task: Task
-  isCompleted?: boolean
   onComplete?: (id: number) => void
   onDelete: (id: number) => void
 }>()
@@ -82,29 +80,30 @@ const props = defineProps<{
 const isConfirmingDelete = ref(false)
 const isEditing = ref(false)
 
-const handleComplete = () => {
-  if (!props.isCompleted && props.onComplete) {
-    props.onComplete(props.task.id)
-  }
-}
-
 const confirmDelete = () => {
   isConfirmingDelete.value = true
 }
-
 const cancelDelete = () => {
   isConfirmingDelete.value = false
 }
-
 const handleDelete = () => {
   props.onDelete(props.task.id)
 }
-
 const startEdit = () => {
   isEditing.value = true
 }
 
+const handleComplete = () => {
+  if (!props.task.completed && props.onComplete) {
+    props.onComplete(props.task.id)
+  }
+}
+
 const priorityCircleStyle = computed(() => {
+  if (props.task.completed) {
+    return { backgroundColor: '#4caf50' } // Grün
+  }
+
   switch (props.task.priority) {
     case 1: return { backgroundColor: '#f44336' }
     case 2: return { backgroundColor: '#ff9800' }
@@ -113,6 +112,7 @@ const priorityCircleStyle = computed(() => {
     default: return { backgroundColor: '#e0e0e0' }
   }
 })
+
 </script>
 
 <style scoped>
@@ -147,10 +147,17 @@ const priorityCircleStyle = computed(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 .priority-circle-inner.bg-green-500 {
   background-color: #4caf50;
 }
+
+.priority-circle:hover {
+  filter: brightness(1.1);
+}
+
 .task-content {
   flex-grow: 1;
 }

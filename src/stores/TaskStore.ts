@@ -102,12 +102,15 @@ export const useTaskStore = defineStore('task', {
     },
 
     getTodayTasks(): Task[] {
-      const today = new Date().toISOString().split('T')[0]
+      const today = new Date()
+      const todayStart = new Date(today.setHours(0, 0, 0, 0))
+      const todayEnd = new Date(today.setHours(23, 59, 59, 999))
+
       return this.tasks
         .filter(t => {
           if (!t.dueDate) return false
           const due = new Date(t.dueDate)
-          return !isNaN(due.getTime()) && due.toISOString().startsWith(today)
+          return due >= todayStart && due <= todayEnd
         })
         .sort((a, b) => a.priority - b.priority)
     },

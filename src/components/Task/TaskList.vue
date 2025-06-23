@@ -66,7 +66,9 @@ const recurring = ref('none') // z. B. 'daily', 'weekly', etc.
 const tasksVisible = ref(true)
 
 const sortedTasks = computed(() => {
-  return [...taskStore.tasks].sort((a, b) => (a.priority ?? 0) - (b.priority ?? 0))
+  return [...taskStore.tasks]
+    .filter(task => !task.completed)
+    .sort((a, b) => (a.priority ?? 0) - (b.priority ?? 0))
 })
 
 function toggleTasks() {
@@ -83,8 +85,6 @@ async function handleAddTask(event: Event) {
     priority: priority.value,
     dueDate: dueDate.value,
     recurring: recurring.value,
-    status: 'offen',
-    user: 'feroza',
   })
 
   title.value = ''

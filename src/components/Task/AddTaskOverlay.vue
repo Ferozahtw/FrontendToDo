@@ -131,6 +131,7 @@ const handleSubmit = () => {
       dueDate,
       priority: parseInt(priority, 10) || 4,
       reminder,
+      user,
     })
     onClose()
   }

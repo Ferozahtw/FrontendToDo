@@ -20,4 +20,19 @@ describe('TaskList.vue', () => {
     // first element should be task with higher priority (1)
     expect((items[0].props('task') as any).id).toBe(2)
   })
+
+  it('filters out completed tasks', () => {
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const store = useTaskStore()
+    store.tasks = [
+      { id: 1, title: 'done', priority: 2, completed: true, createdAt: '' },
+      { id: 2, title: 'todo', priority: 1, completed: false, createdAt: '' }
+    ]
+
+    const wrapper = mount(TaskList, { global: { plugins: [pinia] } })
+    const items = wrapper.findAllComponents({ name: 'TaskItem' })
+    expect(items).toHaveLength(1)
+    expect((items[0].props('task') as any).id).toBe(2)
+  })
 })
